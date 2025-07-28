@@ -406,16 +406,17 @@ class SafStreamPlugin : FlutterPlugin, MethodCallHandler {
             overwrite -> "wt"
             else -> null
         }
-        if (overwrite || append) {
+        if (mode != null) {
             val curFile = dir.findFile(fileName)
-            newFile = curFile ?: dir.createFile(mime, fileName) ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite/append=1")
+            newFile = curFile ?: dir.createFile(mime, fileName)
+                ?: throw Exception("File creation failed at $fileName (createOutStream, $mode)")
             outStream = context.contentResolver.openOutputStream(newFile.uri, mode)
-                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite/append=1")
+                ?: throw Exception("Stream creation failed at $fileName (createOutStream, $mode")
         } else {
             newFile = dir.createFile(mime, fileName)
-                ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite/append=0")
+                ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite=0")
             outStream = context.contentResolver.openOutputStream(newFile.uri)
-                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite/append=0")
+                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite=0")
         }
         return Pair(newFile, outStream)
     }
