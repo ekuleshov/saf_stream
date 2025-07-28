@@ -80,7 +80,7 @@ class MethodChannelSafStream extends SafStreamPlatform {
   @override
   Future<SafNewFile> writeFileBytes(
       String treeUri, String fileName, String mime, Uint8List data,
-      {bool? overwrite}) async {
+      {bool? overwrite, bool? append}) async {
     var map =
         await methodChannel.invokeMapMethod<String, dynamic>('writeFileBytes', {
       'treeUri': treeUri.toString(),
@@ -88,6 +88,7 @@ class MethodChannelSafStream extends SafStreamPlatform {
       'mime': mime,
       'data': data,
       'overwrite': overwrite ?? false,
+      'append': append ?? false,
     });
     if (map == null) {
       throw Exception('Unexpected empty response from `writeFileBytes`');
@@ -98,7 +99,7 @@ class MethodChannelSafStream extends SafStreamPlatform {
   @override
   Future<SafWriteStreamInfo> startWriteStream(
       String treeUri, String fileName, String mime,
-      {bool? overwrite}) async {
+      {bool? overwrite, bool? append}) async {
     var session = _nextSession().toString();
     var map = await methodChannel
         .invokeMapMethod<String, dynamic>('startWriteStream', {
@@ -107,6 +108,7 @@ class MethodChannelSafStream extends SafStreamPlatform {
       'fileName': fileName,
       'mime': mime,
       'overwrite': overwrite ?? false,
+      'append': append ?? false,
     });
     if (map == null) {
       throw Exception('Unexpected empty response from `startWriteStream`');

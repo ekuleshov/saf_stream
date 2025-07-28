@@ -87,13 +87,13 @@ abstract class SafStreamPlatform extends PlatformInterface {
 
   Future<SafNewFile> writeFileBytes(
       String treeUri, String fileName, String mime, Uint8List data,
-      {bool? overwrite}) async {
+      {bool? overwrite, bool? append}) async {
     throw UnimplementedError('writeFileBytes() has not been implemented.');
   }
 
   Future<SafWriteStreamInfo> startWriteStream(
       String treeUri, String fileName, String mime,
-      {bool? overwrite}) async {
+      {bool? overwrite, bool? append}) async {
     throw UnimplementedError('startWriteStream() has not been implemented.');
   }
 

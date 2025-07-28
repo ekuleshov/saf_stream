@@ -172,10 +172,11 @@ class SafStreamPlugin : FlutterPlugin, MethodCallHandler {
                         val mime = call.argument<String>("mime")!!
                         val data = call.argument<ByteArray>("data")!!
                         val overwrite = call.argument<Boolean>("overwrite")!!
+                        val append = call.argument<Boolean>("append") ?: false
                         val dir = DocumentFile.fromTreeUri(context, Uri.parse(treeUriStr))
                             ?: throw Exception("Directory not found")
 
-                        val (newFile, outStream) = createOutStream(dir, fileName, mime, overwrite)
+                        val (newFile, outStream) = createOutStream(dir, fileName, mime, overwrite, append)
 
                         val map = HashMap<String, Any?>()
                         map["uri"] = newFile.uri.toString()
@@ -202,10 +203,11 @@ class SafStreamPlugin : FlutterPlugin, MethodCallHandler {
                         val mime = call.argument<String>("mime")!!
                         val session = call.argument<String>("session")!!
                         val overwrite = call.argument<Boolean>("overwrite")!!
+                        val append = call.argument<Boolean>("append") ?: false
 
                         val dir = DocumentFile.fromTreeUri(context, Uri.parse(treeUriStr))
                             ?: throw Exception("Directory not found")
-                        val (newFile, outStream) = createOutStream(dir, fileName, mime, overwrite)
+                        val (newFile, outStream) = createOutStream(dir, fileName, mime, overwrite, append)
 
                         val map = HashMap<String, Any?>()
                         map["uri"] = newFile.uri.toString()
@@ -396,19 +398,24 @@ class SafStreamPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 
-    private fun createOutStream(dir: DocumentFile, fileName: String, mime: String, overwrite: Boolean) : Pair<DocumentFile, OutputStream> {
+    private fun createOutStream(dir: DocumentFile, fileName: String, mime: String, overwrite: Boolean, append: Boolean = false) : Pair<DocumentFile, OutputStream> {
         val outStream: OutputStream
         val newFile: DocumentFile
-        if (overwrite) {
+        val mode: String? = when {
+            append -> "wa"
+            overwrite -> "wt"
+            else -> null
+        }
+        if (overwrite || append) {
             val curFile = dir.findFile(fileName)
-            newFile = curFile ?: dir.createFile(mime, fileName) ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite=1")
-            outStream = context.contentResolver.openOutputStream(newFile.uri, "wt")
-                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite=1")
+            newFile = curFile ?: dir.createFile(mime, fileName) ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite/append=1")
+            outStream = context.contentResolver.openOutputStream(newFile.uri, mode)
+                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite/append=1")
         } else {
             newFile = dir.createFile(mime, fileName)
-                ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite=0")
+                ?: throw Exception("File creation failed at $fileName (createOutStream, overwrite/append=0")
             outStream = context.contentResolver.openOutputStream(newFile.uri)
-                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite=0")
+                ?: throw Exception("Stream creation failed at $fileName (createOutStream, overwrite/append=0")
         }
         return Pair(newFile, outStream)
     }
